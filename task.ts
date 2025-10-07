@@ -160,7 +160,7 @@ export default class Task extends ETL {
                         type: 'Feature',
                         properties: {
                             callsign: `Buddi: ${tracker.firstName} ${tracker.lastName}`,
-                            type: 'a-s-G',
+                            type: 'a-h-G',
                             how: 'm-g',
                             start,
                             time: new Date().toISOString(),
