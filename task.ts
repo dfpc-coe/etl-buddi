@@ -162,7 +162,7 @@ export default class Task extends ETL {
                             callsign: `Buddi: ${tracker.firstName} ${tracker.lastName}`,
                             type: 'a-h-G',
                             how: 'm-g',
-                            start,
+                            start: start.toISOString(),
                             time: new Date().toISOString(),
                             stale: stale.toISOString(),
                             status: {
