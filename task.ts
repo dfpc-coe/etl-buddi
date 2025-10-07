@@ -1,29 +1,30 @@
 import { Static, Type, TSchema } from '@sinclair/typebox';
 import type { Event } from '@tak-ps/etl';
-import ETL, { SchemaType, handler as internal, local, InputFeature, InputFeatureCollection, DataFlowType, InvocationType } from '@tak-ps/etl';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars --  Fetch with an additional Response.typed(TypeBox Object) definition
+import { Feature } from '@tak-ps/node-cot'
+import ETL, { SchemaType, handler as internal, local, DataFlowType, InvocationType } from '@tak-ps/etl';
 import { fetch } from '@tak-ps/etl';
 
-/**
- * The Input Schema contains the environment object that will be requested via the CloudTAK UI
- * It should be a valid TypeBox object - https://github.com/sinclairzx81/typebox
- */
+// https://eagle-preprod.buddi.co.uk/index.html?action=help#help
 const InputSchema = Type.Object({
+    CustomerID: Type.String({
+        description: 'The Customer ID provided by Buddi'
+    }),
+    RefreshToken: Type.String({
+        description: 'The Refresh Token provided by Buddi'
+    }),
+    ClientSecret: Type.String({
+        description: 'The Client Secret provided by Buddi'
+    }),
     'DEBUG': Type.Boolean({
         default: false,
         description: 'Print results in logs'
     })
 });
 
-/**
- * The Output Schema contains the known properties that will be returned on the
- * GeoJSON Feature in the .properties.metdata object
- */
 const OutputSchema = Type.Object({})
 
 export default class Task extends ETL {
-    static name = 'default'
+    static name = 'etl-buddi'
     static flow = [ DataFlowType.Incoming ];
     static invocation = [ InvocationType.Schedule ];
 
@@ -43,16 +44,26 @@ export default class Task extends ETL {
     }
 
     async control(): Promise<void> {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Get the Environment from the Server and ensure it conforms to the schema
         const env = await this.env(InputSchema);
 
-        const features: Static<typeof InputFeature>[] = [];
+        const base = 'https://eagle-preprod.buddi.co.uk/apiv3/api';
 
-        // Get things here and convert them to GeoJSON Feature Collections
-        // That conform to the node-cot Feature properties spec
-        // https://github.com/dfpc-coe/node-CoT/
+        const authRes = await fetch(new URL(base + '/v1/token'), {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'User-Agent': 'CloudTAK ETL/1.0',
+                'X-Client-Id': env.CustomerID,
+                'X-Client-Secret': env.ClientSecret,
+                'X-Refresh-Token': env.RefreshToken
+            }
+        });
 
-        const fc: Static<typeof InputFeatureCollection> = {
+        await authRes.json();
+
+        const features: Static<typeof Feature.InputFeature>[] = [];
+
+        const fc: Static<typeof Feature.InputFeatureCollection> = {
             type: 'FeatureCollection',
             features: features
         }
