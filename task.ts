@@ -1,6 +1,5 @@
 import { Static, Type, TSchema } from '@sinclair/typebox';
 import type { Event } from '@tak-ps/etl';
-import { parse } from 'date-fns';
 import { Feature } from '@tak-ps/node-cot'
 import ETL, { SchemaType, handler as internal, local, DataFlowType, InvocationType } from '@tak-ps/etl';
 import { fetch } from '@tak-ps/etl';
@@ -36,6 +35,7 @@ const OutputSchema = Type.Object({
     firstName: Type.String(),
     lastName: Type.String(),
     lastGPSTime: Type.Union([Type.String(), Type.Null()]),
+    lastGPSTimeInUTC: Type.Union([Type.String(), Type.Null()]),
     strapStatus: Type.Integer(),
     onCharge: Type.Integer(),
     gpsSignal: Type.Union([Type.Integer(), Type.Null()]),
@@ -124,7 +124,9 @@ export default class Task extends ETL {
 
             const trackers = await locRes.typed(Type.Object({
                 result: Type.Integer(),
+                code: Type.Optional(Type.Integer()),
                 data: Type.Optional(Type.Array(OutputSchema)),
+                message: Type.Optional(Type.String()),
                 meta: Type.Optional(Type.Object({
                     total: Type.Integer(),
                     page: Type.Integer(),
@@ -139,16 +141,16 @@ export default class Task extends ETL {
 
             if (trackers.data) {
                 for (const tracker of trackers.data) {
-                    if (!tracker.lastGPSTime || !tracker.latitude || !tracker.longitude) {
+                    if (!tracker.lastGPSTimeInUTC || !tracker.latitude || !tracker.longitude) {
                         continue;
                     }
 
                     const id = `buddi-${tracker.wearerId}`;
-                    const start = parse(tracker.lastGPSTime, 'MM/dd/yyyy hh:mm:ssaa', new Date());
+                    const start = parseToISOUTC(tracker.lastGPSTimeInUTC);
 
                     const existing = trackerMap.get(id);
 
-                    if (existing && new Date(existing.properties.start) > start) {
+                    if (existing && new Date(existing.properties.start) > new Date(start)) {
                         continue;
                     }
 
@@ -162,7 +164,7 @@ export default class Task extends ETL {
                             callsign: `Buddi: ${tracker.firstName} ${tracker.lastName}`,
                             type: 'a-h-G',
                             how: 'm-g',
-                            start: start.toISOString(),
+                            start: start,
                             time: new Date().toISOString(),
                             stale: stale.toISOString(),
                             status: {
@@ -205,6 +207,35 @@ export default class Task extends ETL {
 
         await this.submit(fc);
     }
+}
+
+/**
+ * Parses a date string from 'MM/dd/yyyy hh:mm:ssaa' format to an ISO 8601 UTC string.
+ * This function assumes the input time is to be interpreted as a UTC time.
+ *
+ * @param dateString The date string to parse, e.g., "10/25/2023 03:45:15PM".
+ * @returns The ISO 8601 UTC string, e.g., "2023-10-25T15:45:15Z".
+ * @throws An error if the input string does not match the expected format.
+ */
+function parseToISOUTC(dateString: string): string {
+    // Groups: 1:MM, 2:dd, 3:yyyy, 4:hh, 5:mm, 6:ss, 7:aa (AM/PM)
+    const regex = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{1,2}):(\d{2}):(\d{2})(am|pm)$/i;
+
+    const match = dateString.match(regex);
+
+    if (!match) {
+        throw new Error("Invalid date format. Expected 'MM/dd/yyyy hh:mm:ssaa'.");
+    }
+
+    const [, month, day, year, hour12Str, minute, second, ampm] = match;
+    let hour = parseInt(hour12Str, 10);
+    if (ampm.toUpperCase() === 'PM' && hour !== 12) {
+        hour += 12;
+    } else if (ampm.toUpperCase() === 'AM' && hour === 12) {
+        hour = 0;
+    }
+    const hour24 = String(hour).padStart(2, '0');
+    return `${year}-${month}-${day}T${hour24}:${minute}:${second}Z`;
 }
 
 await local(await Task.init(import.meta.url), import.meta.url);
