@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.1.2
+
+- :arrow_up: Update API Calls
+
 ### v1.1.1
 
 - :arrow_up: Update Core Deps
