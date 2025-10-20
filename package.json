@@ -20,7 +20,7 @@
     },
     "dependencies": {
         "@sinclair/typebox": "^0.34.0",
-        "@tak-ps/etl": "^9.0.0",
+        "@tak-ps/etl": "^9.22.0",
         "@tak-ps/node-cot": "^14.9.2"
     }
 }
