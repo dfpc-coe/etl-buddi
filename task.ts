@@ -68,7 +68,7 @@ export default class Task extends ETL {
     async control(): Promise<void> {
         const env = await this.env(InputSchema);
 
-        const base = 'https://eagle-preprod.buddi.co.uk/apiv3/api';
+        const base = 'https://eagle.buddi.us/apiv3/api';
 
         const authRes = await fetch(new URL(base + '/v1/token'), {
             method: 'GET',

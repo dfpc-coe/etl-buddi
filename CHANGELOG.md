@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.3.1
+
+- :rocket: Move to production API
+
 ### v1.3.0
 
 - :arrow_up: Update Core Dependencies
