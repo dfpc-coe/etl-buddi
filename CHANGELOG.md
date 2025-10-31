@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.3.2
+
+- :bug: Respect Monitored Only
+
 ### v1.3.1
 
 - :rocket: Move to production API
