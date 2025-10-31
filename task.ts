@@ -219,7 +219,7 @@ export default class Task extends ETL {
  */
 function parseToISOUTC(dateString: string): string {
     // Groups: 1:MM, 2:dd, 3:yyyy, 4:hh, 5:mm, 6:ss, 7:aa (AM/PM)
-    const regex = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{1,2}):(\d{2}):(\d{2})(am|pm)$/i;
+    const regex = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{1,2}):(\d{2}):(\d{2})(am|pm)?$/i;
 
     const match = dateString.match(regex);
 
@@ -229,9 +229,9 @@ function parseToISOUTC(dateString: string): string {
 
     const [, month, day, year, hour12Str, minute, second, ampm] = match;
     let hour = parseInt(hour12Str, 10);
-    if (ampm.toUpperCase() === 'PM' && hour !== 12) {
+    if (ampm && ampm.toUpperCase() === 'PM' && hour !== 12) {
         hour += 12;
-    } else if (ampm.toUpperCase() === 'AM' && hour === 12) {
+    } else if (ampm && ampm.toUpperCase() === 'AM' && hour === 12) {
         hour = 0;
     }
     const hour24 = String(hour).padStart(2, '0');

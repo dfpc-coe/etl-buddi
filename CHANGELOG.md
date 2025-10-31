@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.3.3
+
+- :bug: Fix date parsing
+
 ### v1.3.2
 
 - :bug: Respect Monitored Only
