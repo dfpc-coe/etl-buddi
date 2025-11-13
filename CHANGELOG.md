@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.3.4
+
+- :bug: Use Integer Boolean Value
+
 ### v1.3.3
 
 - :bug: Fix date parsing

@@ -99,7 +99,7 @@ export default class Task extends ETL {
             locURL.searchParams.set('page', String(page));
             locURL.searchParams.set('per_page', String(100))
             if (env.MonitoredOnly) {
-                locURL.searchParams.set('monitored_only', String(env.MonitoredOnly));
+                locURL.searchParams.set('monitored_only', String(env.MonitoredOnly ? '1' : '0'));
             }
 
             if (env.Timeframe && env.Timeframe !== 'All') {
