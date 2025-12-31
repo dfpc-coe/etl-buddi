@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.4.0
+
+- :rocket: Update GH Actions
+
 ### v1.3.4
 
 - :bug: Use Integer Boolean Value
