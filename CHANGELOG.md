@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.5.0
+
+- :rocket: Add support for WearerGroup
+
 ### v1.4.0
 
 - :rocket: Update GH Actions

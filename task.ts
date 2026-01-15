@@ -32,6 +32,8 @@ const InputSchema = Type.Object({
 
 const OutputSchema = Type.Object({
     wearerId: Type.Integer(),
+    wearerType: Type.String(),
+    wearerGroup: Type.String(),
     firstName: Type.String(),
     lastName: Type.String(),
     lastGPSTime: Type.Union([Type.String(), Type.Null()]),
