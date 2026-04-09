@@ -147,12 +147,14 @@ export default class Task extends ETL {
                         continue;
                     }
 
+                    if (!tracker.lastGPSTimeInUTC) continue;
+
                     const id = `buddi-${tracker.wearerId}`;
                     const start = parseToISOUTC(tracker.lastGPSTimeInUTC);
 
                     const existing = trackerMap.get(id);
 
-                    if (existing && new Date(existing.properties.start) > new Date(start)) {
+                    if (existing && new Date(existing.properties.start ?? 0) > new Date(start)) {
                         continue;
                     }
 
@@ -185,7 +187,7 @@ export default class Task extends ETL {
                 break;
             }
 
-            if (!pages && trackers.meta.pages) {
+            if (!pages && trackers.meta?.pages) {
                 pages = trackers.meta.pages;
             }
 
