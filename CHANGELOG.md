@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.6.0
+
+- :arrow_up: Update Core Dependencies
+
 ### v1.5.0
 
 - :rocket: Add support for WearerGroup
