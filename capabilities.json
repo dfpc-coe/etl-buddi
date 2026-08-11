@@ -1,0 +1,27 @@
+{
+    "version": "1.0",
+    "name": "BUDDI",
+    "description": "Ingests BUDDI GPS tracker locations and posts them to the map.",
+    "compute": {
+        "memory": 512,
+        "timeout": 60
+    },
+    "permissions": [
+        {
+            "resource": "feature:*",
+            "required": true,
+            "description": "BUDDI posts GPS tracker locations to the map"
+        }
+    ],
+    "invocations": {
+        "incoming": {
+            "schedule": {
+                "description": "Polls BUDDI for updated tracker locations on a schedule.",
+                "default": {
+                    "enabled": true,
+                    "schedule": "rate(1 minute)"
+                }
+            }
+        }
+    }
+}
