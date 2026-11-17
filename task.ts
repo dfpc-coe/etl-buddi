@@ -56,15 +56,9 @@ export default class Task extends ETL {
         type: SchemaType = SchemaType.Input,
         flow: DataFlowType = DataFlowType.Incoming
     ): Promise<TSchema> {
-        if (flow === DataFlowType.Incoming) {
-            if (type === SchemaType.Input) {
-                return InputSchema;
-            } else {
-                return OutputSchema;
-            }
-        } else {
-            return Type.Object({});
-        }
+        if (flow !== DataFlowType.Incoming) return Type.Object({});
+
+        return type === SchemaType.Input ? InputSchema : OutputSchema;
     }
 
     async control(): Promise<void> {
@@ -94,14 +88,14 @@ export default class Task extends ETL {
         const trackerMap = new Map<string, Static<typeof Feature.InputFeature>>();
 
         let page = 1;
-        let pages;
+        let pages: number | undefined;
 
         do {
             const locURL = new URL(base + '/v1/wearers/locations');
             locURL.searchParams.set('page', String(page));
             locURL.searchParams.set('per_page', String(100))
             if (env.MonitoredOnly) {
-                locURL.searchParams.set('monitored_only', String(env.MonitoredOnly ? '1' : '0'));
+                locURL.searchParams.set('monitored_only', env.MonitoredOnly ? '1' : '0');
             }
 
             if (env.Timeframe && env.Timeframe !== 'All') {
@@ -143,7 +137,11 @@ export default class Task extends ETL {
 
             if (trackers.data) {
                 for (const tracker of trackers.data) {
-                    if (!tracker.lastGPSTimeInUTC || !tracker.latitude || !tracker.longitude) {
+                    if (
+                        !tracker.lastGPSTimeInUTC
+                        || tracker.latitude === null || tracker.latitude === 0
+                        || tracker.longitude === null || tracker.longitude === 0
+                    ) {
                         continue;
                     }
 
@@ -172,7 +170,7 @@ export default class Task extends ETL {
                             time: new Date().toISOString(),
                             stale: stale.toISOString(),
                             status: {
-                                battery: String(tracker.batteryPercentage || 0),
+                                battery: String(tracker.batteryPercentage ?? 0),
                             },
                             metadata: tracker
                         },
@@ -187,11 +185,11 @@ export default class Task extends ETL {
                 break;
             }
 
-            if (!pages && trackers.meta?.pages) {
+            if (pages === undefined && trackers.meta !== undefined && trackers.meta.pages !== 0) {
                 pages = trackers.meta.pages;
             }
 
-            if (!pages) {
+            if (pages === undefined) {
                 console.log('could not determine number of pages');
                 break;
             }
@@ -232,7 +230,7 @@ function parseToISOUTC(dateString: string): string {
     }
 
     const [, month, day, year, hour12Str, minute, second, ampm] = match;
-    let hour = parseInt(hour12Str, 10);
+    let hour = Number(hour12Str);
     if (ampm && ampm.toUpperCase() === 'PM' && hour !== 12) {
         hour += 12;
     } else if (ampm && ampm.toUpperCase() === 'AM' && hour === 12) {
@@ -243,7 +241,7 @@ function parseToISOUTC(dateString: string): string {
 }
 
 await local(await Task.init(import.meta.url), import.meta.url);
-export async function handler(event: Event = {}) {
-    return await internal(new Task(import.meta.url), event);
+export async function handler(event: Event = {}): ReturnType<typeof internal> {
+    return internal(new Task(import.meta.url), event);
 }
 

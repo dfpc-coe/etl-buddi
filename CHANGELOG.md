@@ -12,6 +12,12 @@
 
 ### Pending Release
 
+### v1.15.0 - 2026-11-17
+
+- :arrow_up: Migrate to TS7 for blazing build times
+- :arrow_up: Migrate off ESLint onto OXLint for blazing lint times
+- :bug: Fix numerous small bugs in the codebase surfaced by OXLint
+
 ### v1.14.0
 
 - :arrow_up: Update `@tak-ps/etl` to 11.x - Output schemas are published as named schemas, as required by CloudTAK v14
